@@ -127,7 +127,7 @@ def run(episodes, is_training=True, render=False):
             else:
                 save_update(action_save,action,2000)
                     
-            q_mini = torch.tensor([0]*64, dtype=torch.float).to(device)
+            v_mini = torch.tensor([0]*64, dtype=torch.float).to(device)
             g_mini = torch.tensor([0]*64, dtype=torch.float).to(device)
             l = 0
             for j in range(64):
@@ -151,12 +151,12 @@ def run(episodes, is_training=True, render=False):
                     else:
                         G = torch.tensor([0], dtype=torch.float).to(device)
                     G = reward_save[random_index+1] + discount*G
-                    q_mini[l]=v_estermator(torch.tensor(state_save[random_index], dtype=torch.float32).to(device).reshape(1,-1))[0]
+                    v_mini[l]=v_estermator(torch.tensor(state_save[random_index], dtype=torch.float32).to(device).reshape(1,-1))[0]
                     g_mini[l]=G
                     
                     l += 1
             if not l == 0:
-                loss = criter(q_mini[:l].reshape(1,l),g_mini[:l].reshape(1,l).detach())
+                loss = criter(v_mini[:l].reshape(1,l),g_mini[:l].reshape(1,l).detach())
                 
                 q_optimizer.zero_grad()
                 loss.backward()
