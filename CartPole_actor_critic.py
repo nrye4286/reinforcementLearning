@@ -130,7 +130,7 @@ def run(episodes, is_training=True, render=False):
             l = 0
             for j in range(64):
                 pi_optimizer.zero_grad()
-                random_index = np.random.randint(2001-5)
+                random_index = np.random.randint(2001-4)
                 if not action_save[random_index] == None:
                     if not action_save[random_index+1] == None:
                         if not action_save[random_index+2] == None:
