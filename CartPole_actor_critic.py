@@ -39,7 +39,7 @@ class PiNetwork(nn.Module):
     
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 v_estermator = VNetwork().to(device)
-q_optimizer = optim.SGD(v_estermator.parameters(),lr=1e-3)
+v_optimizer = optim.SGD(v_estermator.parameters(),lr=1e-3)
 pi = PiNetwork().to(device)
 pi_optimizer = optim.SGD(pi.parameters(),lr=1e-4)
 criter = nn.MSELoss()
@@ -156,9 +156,9 @@ def run(episodes, is_training=True, render=False):
             if not l == 0:
                 loss = criter(v_mini[:l].reshape(1,l),g_mini[:l].reshape(1,l).detach())
                 
-                q_optimizer.zero_grad()
+                v_optimizer.zero_grad()
                 loss.backward()
-                q_optimizer.step()
+                v_optimizer.step()
                 
             for j in range(8):
                 random_index = np.random.randint(2000)
