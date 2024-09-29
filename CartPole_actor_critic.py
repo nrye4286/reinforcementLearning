@@ -15,7 +15,6 @@ class VNetwork(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = torch.flatten(x, 1)
         x = self.relu(self.fc0(x))
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
@@ -32,7 +31,6 @@ class PiNetwork(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        x = torch.flatten(x, 1)
         x = self.relu(self.fc0(x))
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
