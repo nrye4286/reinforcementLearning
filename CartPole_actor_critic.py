@@ -196,6 +196,4 @@ def run(episodes, is_training=True, render=False):
             )
     env.close()
 
-if __name__ == '__main__':
-
-    run(3000, is_training=True, render=True)
+run(3000, is_training=True, render=True)
