@@ -108,7 +108,7 @@ num_outputs = envs[0].action_space.shape[0]
 hidden_size      = 64
 lr               = 5e-5 #무작정 Lr낮추는 짓 안하려고 PPO같은 알고리즘 쓰는거임.
 num_steps        = 20 #num_step * len(envs)개마다 학습을 시킴
-mini_batch_size  = 32 #근데 그 20개를 순서대로 하는게 아니고, 32개씩 10번 랜덤하게 뽑아서 학습시킴.
+mini_batch_size  = 32 #근데 그 num_step * len(envs)개를 순서대로 하는게 아니고, 32개씩 10번 랜덤하게 뽑아서 학습시킴.
 ppo_epochs       = 10
 
 model = ActorCritic(num_inputs, num_outputs, hidden_size).to(device)
