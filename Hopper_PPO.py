@@ -89,14 +89,7 @@ def ppo_update(ppo_epochs, mini_batch_size, states, actions, log_probs, returns,
 def f(episode_id: int) -> bool:
     if episode_id % 10 == 0: return True
     else: return False
-envs = [gym.make('Hopper-v4', render_mode='rgb_array_list'),gym.make('Hopper-v4', render_mode=None),
-        gym.make('Hopper-v4', render_mode=None),gym.make('Hopper-v4', render_mode=None),
-        gym.make('Hopper-v4', render_mode=None),gym.make('Hopper-v4', render_mode=None),
-        gym.make('Hopper-v4', render_mode=None),gym.make('Hopper-v4', render_mode=None),
-        gym.make('Hopper-v4', render_mode=None),gym.make('Hopper-v4', render_mode=None),
-        gym.make('Hopper-v4', render_mode=None),gym.make('Hopper-v4', render_mode=None),
-        gym.make('Hopper-v4', render_mode=None),gym.make('Hopper-v4', render_mode=None),
-        gym.make('Hopper-v4', render_mode=None),gym.make('Hopper-v4', render_mode=None)]
+envs = [gym.make('Hopper-v4', render_mode='rgb_array_list')]+[gym.make('Hopper-v4', render_mode=None)]*(16-1)
 
 envs_state = [[envs[i].reset()[0]] for i in range(16)]
 whichs = list(range(16))
