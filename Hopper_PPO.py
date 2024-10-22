@@ -12,11 +12,6 @@ from gymnasium.utils.save_video import save_video
 use_cuda = torch.cuda.is_available()
 device   = torch.device("cuda" if use_cuda else "cpu")
 
-def init_weights(m):
-    if isinstance(m, nn.Linear): # nn.Linear이면 True
-        nn.init.normal_(m.weight, mean=0., std=0.1)
-        nn.init.constant_(m.bias, 0.1)
-        
 
 class ActorCritic(nn.Module):
     def __init__(self, num_inputs, num_outputs, hidden_size, std=0.0):
@@ -41,12 +36,10 @@ class ActorCritic(nn.Module):
         )
         self.log_std = nn.Parameter(torch.ones(1, num_outputs) * std) # 표준편차를 학습시킴.
         
-        self.apply(init_weights) # __init__ 뒤에 함수 넣어서 실행시키면 가중치 초기화 할 수 있음
-        
     def forward(self, x):
         value = self.critic(x)
         mu    = self.actor(x)
-        std   = self.log_std.exp().expand_as(mu) # 왜 지수형태로 사용하는지 의문. 나중에 분석 ㄱㄱ, 탐험 너무 안하길래 상수 추가해줌.
+        std   = self.log_std.exp().expand_as(mu)
         dist  = Normal(mu, std)
         return dist, value
 
@@ -66,8 +59,8 @@ def ppo_iter(mini_batch_size, states, actions, log_probs, returns, advantage):
         rand_ids = np.random.randint(0, batch_size, mini_batch_size)
         yield states[rand_ids, :], actions[rand_ids, :], log_probs[rand_ids, :], returns[rand_ids, :], advantage[rand_ids, :]
         
-def ppo_update(ppo_epochs, mini_batch_size, states, actions, log_probs, returns, advantages, clip_param=0.15): # 20개 단위로 업데이트에 패널티 주면서 학습. 20개를 5개씩 4번 학습하는데 이때
-    for _ in range(ppo_epochs):                                                                               # old정책과 많이 차이가 안나도록 함.
+def ppo_update(ppo_epochs, mini_batch_size, states, actions, log_probs, returns, advantages, clip_param=0.15): 
+    for _ in range(ppo_epochs):
         for state, action, old_log_probs, return_, advantage in ppo_iter(mini_batch_size, states, actions, log_probs, returns, advantages):
             dist, value = model(state)
             entropy = dist.entropy().mean()
@@ -80,9 +73,9 @@ def ppo_update(ppo_epochs, mini_batch_size, states, actions, log_probs, returns,
             actor_loss  = - torch.min(surr1, surr2).mean()
             critic_loss = (return_ - value).pow(2).mean()
 
-            loss = 0.5 * critic_loss + actor_loss - 0.003 * entropy #정책이 가치보다 천천히 변하도록, 탐험 장려하도록 엔트로피 추가
+            loss = 0.5 * critic_loss + actor_loss - 0.003 * entropy #탐험 장려하도록 엔트로피 추가
 
-            optimizer.zero_grad() # 분포에서 행동을 샘플링한 뒤, 그 행동의 밀도를 계산하는것에는 랜덤성이 없고 그래프로 구현이 가능 따라서 역전파 가능능
+            optimizer.zero_grad() # 분포에서 행동을 샘플링한 뒤, 그 행동의 밀도를 계산하는것에는 랜덤성이 없고 그래프로 구현이 가능 따라서 역전파 가능
             loss.backward()
             optimizer.step()
             
@@ -99,9 +92,9 @@ num_outputs = envs[0].action_space.shape[0]
 
 #Hyper params:
 hidden_size      = 64
-lr               = 5e-5 #무작정 Lr낮추는 짓 안하려고 PPO같은 알고리즘 쓰는거임.
+lr               = 5e-5
 num_steps        = 20 #num_step * len(envs)개마다 학습을 시킴
-mini_batch_size  = 32 #근데 그 num_step * len(envs)개를 순서대로 하는게 아니고, 32개씩 10번 랜덤하게 뽑아서 학습시킴.
+mini_batch_size  = 32 
 ppo_epochs       = 10
 
 model = ActorCritic(num_inputs, num_outputs, hidden_size).to(device)
@@ -138,7 +131,6 @@ def train():
                     done = True
                 
                 log_prob = dist.log_prob(action)
-                entropy += dist.entropy().mean()
                 
                 log_probs.append(log_prob)
                 values.append(value)
@@ -194,36 +186,3 @@ def train():
 
 
 train()
-
-model = ActorCritic(num_inputs, num_outputs, hidden_size).to(device)
-optimizer = optim.SGD(model.parameters(), lr=lr)
-
-model.load_state_dict(torch.load(r"G:\내 드라이브\Colab Notebooks\gymnasium\model.pt"))
-
-def test(i):
-    env = gym.make('Hopper-v4', render_mode="rgb_array_list")
-    
-    state = env.reset()[0]
-    
-    for j in range(1000):
-        state = torch.FloatTensor(state).to(device).unsqueeze(dim=0)
-        dist, value = model(state)
-
-        action = dist.sample()
-        next_state, reward, terminated, truncated, _ = env.step(action.cpu().numpy().squeeze())
-
-        state = next_state
-        
-
-        
-    save_video(
-    env.render(),
-    "videos",
-    episode_trigger=f,
-    fps=env.metadata["render_fps"],
-    step_starting_index=0,
-    episode_index=i
-)
-
-for i in range(10):
-    test(i)
