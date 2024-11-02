@@ -87,9 +87,6 @@ class DQNBreakout(gym.Wrapper):
         
         return img
 
-#model------------------------------------------------------------------------------------------
-
-
 class AtariNet(nn.Module):
     def __init__(self, nb_action=4):
         super(AtariNet, self).__init__()
@@ -146,8 +143,6 @@ class AtariNet(nn.Module):
             print(f"Successfully loaded weights file {weights_filename}")
         except:
             print(f"No weights file available at {weights_filename}")
-#agent------------------------------------------------------------------------------------------
-
 
 class ReplayMemory:
     def __init__(self, capacity, device='cpu'):
@@ -287,7 +282,6 @@ class Agent:
                 state, reward, done, info = env.step(action)
                 if done:
                     break
-#plot------------------------------------------------------------------------------------------
 
 class LivePlot():
     def __init__(self):
@@ -320,7 +314,6 @@ class LivePlot():
         current_date = datetime.now().strftime('%Y-%m-%d')
             
         self.fig.savefig(f'plots/plot_{current_date}')
-#main------------------------------------------------------------------------------------------
 
 os.environ['KMP_DUPLICATE_OK'] = 'TRUE'
 
